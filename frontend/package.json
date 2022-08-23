@@ -1,0 +1,30 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.10.0",
+    "@emotion/react": "^11.10.0",
+    "facepaint": "^1.2.1",
+    "next": "12.2.5",
+    "normalize.css": "^8.0.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "postinstall": "cat facepaintConfig > node_modules/@types/facepaint/index.d.ts"
+  },
+  "devDependencies": {
+    "@types/facepaint": "^1.2.2",
+    "@types/node": "18.7.11",
+    "@types/react": "18.0.17",
+    "@types/react-dom": "18.0.6",
+    "eslint": "8.22.0",
+    "eslint-config-next": "12.2.5",
+    "typescript": "4.7.4"
+  }
+}
