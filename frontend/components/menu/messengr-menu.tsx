@@ -1,21 +1,25 @@
 /** @jsxImportSource @emotion/react */
 
+import React from 'react';
+import { ThemeContext } from '../../context/theme-context';
 import { headingFont, paragraphFont } from '../../styles/fonts';
 import { mq } from '../../styles/mq';
 import { ChatSummarisedView } from '../chat/chat-summarised-view';
 
 export const MessengrMenu = () => {
+  const theme = React.useContext(ThemeContext);
+  const style = theme['components']['menu'] as { [key: string]: string };
+
   return (
     <aside
       css={mq({
+        ...style,
         minWidth: ['360px', '400px'],
         height: '100%',
-        background: '#060917',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        boxShadow: '2px 0px 20px rgba(0, 0, 0, 1)',
         zIndex: '2',
       })}
     >
@@ -33,9 +37,9 @@ export const MessengrMenu = () => {
             fontFamily: headingFont,
             fontSize: ['20px', '24px'],
             fontWeight: 700,
-            color: 'white',
+            color: theme.colors.primary,
             textAlign: 'left',
-            borderBottom: '1px solid rgba(180, 180, 180, 0.15)',
+            borderBottom: theme.colors.divider,
             paddingBottom: '12px',
           })}
         >
@@ -48,6 +52,7 @@ export const MessengrMenu = () => {
 };
 
 export const AllChatsMenu = () => {
+  const theme = React.useContext(ThemeContext);
   return (
     <section
       css={mq({
@@ -62,18 +67,11 @@ export const AllChatsMenu = () => {
       <input
         placeholder="Search"
         css={{
-          background: '#030610',
+          ...(theme.input.search as { [key: string]: string }),
           border: 'none',
-          // border: '1.5px solid purple',
           outline: 'none',
           padding: '16px',
           borderRadius: '4px',
-          '::placeholder': {
-            opacity: '0.3',
-            color: 'white',
-            fontWeight: 400,
-          },
-          color: 'white',
           fontWeight: 500,
         }}
       />

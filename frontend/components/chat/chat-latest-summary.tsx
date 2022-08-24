@@ -1,6 +1,11 @@
 /** @jsxImportSource @emotion/react */
 
+import React from 'react';
+import { ThemeContext } from '../../context/theme-context';
+
 export const ChatLatestSummary = () => {
+  const theme = React.useContext(ThemeContext);
+
   return (
     <div
       css={{
@@ -13,7 +18,7 @@ export const ChatLatestSummary = () => {
       <h4 css={{ margin: 0 }}>Chat Name</h4>
       <div
         css={{
-          color: 'rgba(255, 255, 255, 0.5)',
+          color: theme.colors.grey,
           fontSize: '12px',
           width: '100%',
           display: 'flex',
