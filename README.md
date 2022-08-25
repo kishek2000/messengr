@@ -10,7 +10,7 @@ Keeping it simple for now - NextJS frontend working with Cloudflare Workers and 
 
 TODOs
 
-- [ x ] Write the frontend UI (basic form)
+- [x] Write the frontend UI (basic form)
 - [ ] Write backend endpoints for
   - [ ] `/register` - register a new user
   - [ ] `/login` - login with your account
