@@ -34,23 +34,24 @@ export const AuthLoginPanel = () => {
   };
 
   const onLogin = () => {
-    const usernameCorrect =
-      loginForm.username === mockUserA.username ||
-      loginForm.username === mockUserB.username;
-    const passwordCorrect =
-      loginForm.password === mockUserA.password ||
-      loginForm.password === mockUserB.password;
-
-    if (usernameCorrect && passwordCorrect) {
-      let user: User = mockUserA;
-      if (mockUserB.username === loginForm.username) {
-        user = mockUserB;
-      }
-      userDispatch({ type: 'login', payload: { user } });
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-
-    router.push('/chats');
+    fetch('https://messengr-backend.kishek12.workers.dev/login', {
+      method: 'POST',
+      body: JSON.stringify(loginForm),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((response) => {
+      response
+        .json()
+        .then((json) => {
+          userDispatch({ type: 'login', payload: { user: json.user } });
+          localStorage.setItem('user', JSON.stringify(json.user));
+          router.push('/chats');
+        })
+        .catch((err) => {
+          console.log('Error', err);
+        });
+    });
   };
 
   return (

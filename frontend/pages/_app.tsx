@@ -54,7 +54,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     if (lStorageUser === null) {
       router.push('/');
     } else {
-      userDispatch({ type: 'login', payload: JSON.parse(lStorageUser) });
+      userDispatch({
+        type: 'login',
+        payload: { user: JSON.parse(lStorageUser) },
+      });
       router.push('/chats');
     }
 

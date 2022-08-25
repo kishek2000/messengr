@@ -6,10 +6,14 @@ import { ThemeContext } from '../../context/theme-context';
 import { AuthPanelInput } from './auth-panel-input';
 import { AuthPanelButton } from './auth-panel-button';
 import { useRouter } from 'next/router';
+import { User } from '../../model/types';
+import { v4 } from 'uuid';
+import { UserContext } from '../../context/user-context';
 
 export const AuthRegisterPanel = () => {
   const router = useRouter();
   const theme = React.useContext(ThemeContext);
+  const { userDispatch } = React.useContext(UserContext);
 
   const [registerForm, setRegisterForm] = React.useState({
     username: '',
@@ -25,8 +29,32 @@ export const AuthRegisterPanel = () => {
   );
 
   const onSignUp = React.useCallback(() => {
-    router.push('/chats');
-  }, [router]);
+    const createdUser: User = {
+      username: registerForm.username,
+      password: registerForm.password,
+      id: v4(),
+      avatar: '',
+    };
+
+    fetch('https://messengr-backend.kishek12.workers.dev/register', {
+      method: 'POST',
+      body: JSON.stringify(createdUser),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((response) => {
+      response
+        .text()
+        .then((text) => {
+          console.log(text);
+          userDispatch({ type: 'login', payload: { user: createdUser } });
+          router.push('/chats');
+        })
+        .catch((err) => {
+          console.log('Error', err);
+        });
+    });
+  }, [router, registerForm, userDispatch]);
 
   return (
     <div
