@@ -9,6 +9,7 @@ export interface MessengrTheme {
     tertiary: string;
     grey: string;
     divider: string;
+    welcome: string;
   };
   input: {
     search: Interpolation<Theme>;
@@ -17,9 +18,15 @@ export interface MessengrTheme {
   components: {
     chatCompleteView: Interpolation<Theme>;
     chatSummarisedView: Interpolation<Theme>;
+    chatSummarisedViewActive: Interpolation<Theme>;
     chatAvatar: Interpolation<Theme>;
     menu: Interpolation<Theme>;
     themeToggle: Interpolation<Theme>;
+    authPanel: Interpolation<Theme>;
+    buttonPrimary: Interpolation<Theme>;
+    buttonSecondary: Interpolation<Theme>;
+    message: Interpolation<Theme>;
+    messageActiveUser: Interpolation<Theme>;
   };
   toString: () => string;
 }

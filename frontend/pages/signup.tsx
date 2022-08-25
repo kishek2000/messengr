@@ -6,12 +6,10 @@ import React from 'react';
 import { ThemeContext } from '../context/theme-context';
 import { headingFont } from '../styles/fonts';
 import { AiFillMessage } from 'react-icons/ai';
-import { AuthLoginPanel } from '../components/auth/auth-login-panel';
-import { UserContext } from '../context/user-context';
+import { AuthRegisterPanel } from '../components/auth/auth-register-panel';
 
-const Home: NextPage = () => {
+const SignUp: NextPage = () => {
   const theme = React.useContext(ThemeContext);
-  const { user } = React.useContext(UserContext);
 
   return (
     <main
@@ -39,9 +37,9 @@ const Home: NextPage = () => {
         <AiFillMessage size={64} />
         <h1>Welcome to Messengr</h1>
       </hgroup>
-      <AuthLoginPanel />
+      <AuthRegisterPanel />
     </main>
   );
 };
 
-export default Home;
+export default SignUp;

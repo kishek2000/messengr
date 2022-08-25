@@ -8,12 +8,19 @@ export const defaultTheme: MessengrTheme = {
     tertiary: 'white',
     grey: 'rgba(0, 0, 0, 0.5)',
     divider: '1px solid rgba(255, 255, 255, 0.5)',
+    welcome: 'black',
   },
   input: {
     search: {
       background: 'white',
+      border: '1.5px solid #333',
+      outline: 'none',
       color: 'black',
-      '::placeholder': { opacity: '0.3', fontWeight: 400 },
+      '::placeholder': {
+        opacity: '0.3',
+        fontWeight: 400,
+      },
+      ':focus': { outline: '1.5px solid black' },
     },
   },
   components: {
@@ -33,9 +40,25 @@ export const defaultTheme: MessengrTheme = {
         background: 'white',
       },
     },
+    chatSummarisedViewActive: {
+      background: 'white',
+    },
     chatAvatar: {
       background: '#999',
     },
+    authPanel: {
+      boxShadow: '0px 0px 20px rgba(0, 0, 0, .1)',
+    },
+    buttonPrimary: {
+      background: 'black',
+      color: 'white',
+    },
+    buttonSecondary: {
+      background: '#eee',
+      color: 'black',
+    },
+    message: { background: '#eee' },
+    messageActiveUser: { background: '#333', color: 'white' },
   },
   toString: () => 'defaultTheme',
 };

@@ -2,11 +2,23 @@
 
 import React from 'react';
 import { ThemeContext } from '../../context/theme-context';
-import { headingFont, paragraphFont } from '../../styles/fonts';
+import { Chat } from '../../model/types';
+import { headingFont } from '../../styles/fonts';
 import { mq } from '../../styles/mq';
-import { ChatSummarisedView } from '../chat/chat-summarised-view';
+import { AuthLogoutButton } from '../auth/auth-logout-button';
+import { MenuChatList } from './menu-chat-list';
 
-export const MessengrMenu = () => {
+export interface MessengrMenuProps {
+  chats: Chat[];
+  activeChat: Chat | null;
+  setActiveChat: React.Dispatch<React.SetStateAction<Chat | null>>;
+}
+
+export const MessengrMenu: React.FC<MessengrMenuProps> = ({
+  chats,
+  activeChat,
+  setActiveChat,
+}) => {
   const theme = React.useContext(ThemeContext);
   const style = theme['components']['menu'] as { [key: string]: string };
 
@@ -27,63 +39,41 @@ export const MessengrMenu = () => {
         css={{
           display: 'flex',
           flexDirection: 'column',
-          height: '95%',
+          height: '90%',
           justifyContent: 'space-between',
           width: '85%',
         }}
       >
-        <h3
-          css={mq({
-            fontFamily: headingFont,
-            fontSize: ['20px', '24px'],
-            fontWeight: 700,
-            color: theme.colors.primary,
-            textAlign: 'left',
-            borderBottom: theme.colors.divider,
-            paddingBottom: '12px',
-          })}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            height: '90%',
+          }}
         >
-          Chats
-        </h3>
-        <AllChatsMenu />
+          <h3
+            css={mq({
+              fontFamily: headingFont,
+              fontSize: ['20px', '24px'],
+              fontWeight: 700,
+              color: theme.colors.primary,
+              textAlign: 'left',
+              borderBottom: theme.colors.divider,
+              paddingBottom: '12px',
+              margin: 0,
+            })}
+          >
+            Chats
+          </h3>
+          <MenuChatList
+            chats={chats}
+            activeChat={activeChat}
+            setActiveChat={setActiveChat}
+          />
+        </div>
+        <AuthLogoutButton />
       </div>
     </aside>
-  );
-};
-
-export const AllChatsMenu = () => {
-  const theme = React.useContext(ThemeContext);
-  return (
-    <section
-      css={mq({
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%',
-        fontFamily: paragraphFont,
-        gap: '24px',
-      })}
-    >
-      <input
-        placeholder="Search"
-        css={{
-          ...(theme.input.search as { [key: string]: string }),
-          border: 'none',
-          outline: 'none',
-          padding: '16px',
-          borderRadius: '4px',
-          fontWeight: 500,
-        }}
-      />
-      <section
-        css={mq({
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        })}
-      >
-        <ChatSummarisedView />
-      </section>
-    </section>
   );
 };

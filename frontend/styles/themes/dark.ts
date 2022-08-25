@@ -7,13 +7,20 @@ export const darkTheme: MessengrTheme = {
     tertiary: '#030610',
     grey: 'rgba(255, 255, 255, 0.5)',
     divider: '1px solid rgba(255, 255, 255, 0.5)',
+    welcome: 'magenta',
   },
   input: {
     search: {
       background: '#030610',
       border: '1.5px solid purple',
+      outline: 'none',
       color: 'white',
-      '::placeholder': { opacity: '0.3', fontWeight: 400, color: 'white' },
+      '::placeholder': {
+        opacity: '0.3',
+        fontWeight: 400,
+        color: 'lightskyblue',
+      },
+      ':focus': { outline: '1.5px solid magenta' },
     },
   },
   components: {
@@ -34,8 +41,28 @@ export const darkTheme: MessengrTheme = {
         background: '#030610',
       },
     },
+    chatSummarisedViewActive: {
+      background: '#030610',
+    },
     chatAvatar: {
       background: 'purple',
+    },
+    authPanel: {
+      boxShadow: '0px 0px 20px rgba(0, 0, 0, 1)',
+    },
+    buttonPrimary: {
+      background: 'darkorchid',
+      color: 'white',
+    },
+    buttonSecondary: {
+      background: '#16162d',
+      color: 'white',
+    },
+    message: {
+      background: '#222',
+    },
+    messageActiveUser: {
+      background: '#3c0657',
     },
   },
   toString: () => 'darkTheme',

@@ -1,19 +1,41 @@
 /** @jsxImportSource @emotion/react */
 
 import 'normalize.css';
+import React, { Fragment } from 'react';
 import type { AppProps } from 'next/app';
 import { MessengrTheme, ThemeContext } from '../context/theme-context';
 import { defaultTheme } from '../styles/themes/default';
-import React, { Fragment, useContext } from 'react';
 import { darkTheme } from '../styles/themes/dark';
-import { mq } from '../styles/mq';
 
-import { BsSunFill, BsMoonFill } from 'react-icons/bs';
+import { ThemeSelection } from '../components/common/theme-toggle';
+import {
+  initialUser,
+  UserContext,
+  userDispatcher,
+} from '../context/user-context';
+import { useRouter } from 'next/router';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [theme, setTheme] = React.useState(defaultTheme);
+  const [theme, setTheme] = React.useState(darkTheme);
+  const [mobileMode, setMobileMode] = React.useState(false);
+  const [user, userDispatch] = React.useReducer(
+    userDispatcher,
+    initialUser.user
+  );
+
+  const router = useRouter();
 
   React.useEffect(() => {
+    const resizeListener = () => {
+      if (window.innerWidth <= 1028) {
+        setMobileMode(true);
+      } else {
+        setMobileMode(false);
+      }
+    };
+
+    window.addEventListener('resize', resizeListener);
+
     const cachedTheme = localStorage.getItem('theme');
     let themeChosen: MessengrTheme;
 
@@ -27,84 +49,33 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
     setTheme(themeChosen);
     localStorage.setItem('theme', themeChosen.toString());
+
+    const lStorageUser = localStorage.getItem('user');
+    if (lStorageUser === null) {
+      router.push('/');
+    } else {
+      userDispatch({ type: 'login', payload: JSON.parse(lStorageUser) });
+      router.push('/chats');
+    }
+
+    return () => window.removeEventListener('resize', resizeListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <ThemeContext.Provider value={theme}>
-      <Component {...pageProps} />
-      <ThemeSelection setTheme={setTheme} />
-    </ThemeContext.Provider>
+    <UserContext.Provider value={{ user, userDispatch }}>
+      <ThemeContext.Provider value={theme}>
+        {mobileMode ? (
+          <div>ayo go on desktop</div>
+        ) : (
+          <Fragment>
+            <Component {...pageProps} />
+            <ThemeSelection setTheme={setTheme} />
+          </Fragment>
+        )}
+      </ThemeContext.Provider>
+    </UserContext.Provider>
   );
 }
-
-interface ThemeSelectionProps {
-  setTheme: React.Dispatch<React.SetStateAction<MessengrTheme>>;
-}
-
-export const ThemeSelection: React.FC<ThemeSelectionProps> = ({ setTheme }) => {
-  const currentTheme = useContext(ThemeContext);
-
-  const switchTheme = React.useCallback(() => {
-    setTheme((theme) => {
-      if (theme.toString() === 'darkTheme') {
-        return defaultTheme;
-      }
-      return darkTheme;
-    });
-  }, [setTheme]);
-
-  const isDarkMode = React.useCallback(
-    () => currentTheme.toString().includes('dark'),
-    [currentTheme]
-  );
-
-  const icon = isDarkMode() ? (
-    <BsMoonFill css={{ width: '16px', height: '16px' }} />
-  ) : (
-    <BsSunFill css={{ width: '16px', height: '16px' }} />
-  );
-  const togglePosition = React.useMemo(
-    () => (isDarkMode() ? { right: '0px' } : { right: '24px' }),
-    [isDarkMode]
-  );
-
-  return (
-    <button
-      css={mq({
-        ...(currentTheme.components.themeToggle as { [key: string]: string }),
-        position: 'fixed',
-        top: ['24px'],
-        right: ['24px'],
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '48px',
-        outline: 'none',
-        border: 'none',
-        borderRadius: '24px',
-        height: '32px',
-        cursor: 'pointer',
-      })}
-      onClick={switchTheme}
-    >
-      <div
-        css={{
-          ...togglePosition,
-          transition: '0.2s',
-          position: 'absolute',
-          width: '24px',
-          height: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {icon}
-      </div>
-    </button>
-  );
-};
 
 export default MyApp;
