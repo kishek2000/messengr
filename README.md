@@ -10,7 +10,7 @@ Keeping it simple for now - NextJS frontend working with Cloudflare Workers and 
 
 TODOs
 
-- [ ] Write the frontend UI
+- [ ] Write the frontend UI (basic form)
 - [ ] Write backend endpoints for
   - [ ] `/register` - register a new user
   - [ ] `/login` - login with your account
@@ -22,4 +22,12 @@ TODOs
   - [ ] `DELETE /chat/member` - delete member from chat
   - [ ] `POST /chat/message` - send a message
   - [ ] `GET /chat/messages` - get all messages for a chat
-- [ ] Connect the frontend to backend
+- [ ] Connect the frontend to backend with sockets and REST
+- [ ] Add functionality for
+  - [ ] Sending image/video
+  - [ ] Seeing who is currently typing
+  - [ ] Seeing who has read messages
+  - [ ] Forwarding messages
+  - [ ] Emojis
+  - [ ] Reactions
+  - [ ] More themes
