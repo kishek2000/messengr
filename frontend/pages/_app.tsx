@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import 'normalize.css';
+import '../styles/fonts.css';
 import React, { Fragment } from 'react';
 import type { AppProps } from 'next/app';
 import { ThemeContext } from '../context/theme-context';
