@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { User } from '../../model/types';
 import { v4 } from 'uuid';
 import { UserContext } from '../../context/user-context';
+import { registerUser } from '../../api/user';
 
 export const AuthRegisterPanel = () => {
   const router = useRouter();
@@ -21,14 +22,11 @@ export const AuthRegisterPanel = () => {
     confirmPassword: '',
   });
 
-  const handleFormChange = React.useCallback(
-    (name: string, e: React.ChangeEvent<HTMLInputElement>) => {
-      setRegisterForm((form) => ({ ...form, [name]: e.target.value }));
-    },
-    []
-  );
+  const handleFormChange = React.useCallback((name: string, value: any) => {
+    setRegisterForm((form) => ({ ...form, [name]: value }));
+  }, []);
 
-  const onSignUp = React.useCallback(() => {
+  const onSignUp = React.useCallback(async () => {
     const createdUser: User = {
       username: registerForm.username,
       password: registerForm.password,
@@ -36,24 +34,14 @@ export const AuthRegisterPanel = () => {
       avatar: '',
     };
 
-    fetch('https://messengr-backend.kishek12.workers.dev/register', {
-      method: 'POST',
-      body: JSON.stringify(createdUser),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => {
-      response
-        .text()
-        .then((text) => {
-          console.log(text);
-          userDispatch({ type: 'login', payload: { user: createdUser } });
-          router.push('/chats');
-        })
-        .catch((err) => {
-          console.log('Error', err);
-        });
-    });
+    try {
+      await registerUser(createdUser);
+      userDispatch({ type: 'login', payload: { user: createdUser } });
+
+      router.push('/chats');
+    } catch (e) {
+      console.log('Error', e);
+    }
   }, [router, registerForm, userDispatch]);
 
   return (
@@ -70,9 +58,7 @@ export const AuthRegisterPanel = () => {
         gap: '56px',
       })}
     >
-      <h5 css={mq({ fontWeight: 500, margin: 0, color: theme.colors.primary })}>
-        Register
-      </h5>
+      <h5 css={mq({ fontWeight: 500, margin: 0, color: theme.colors.primary })}>Register</h5>
       <form
         css={mq({
           width: '100%',
@@ -111,11 +97,7 @@ export const AuthRegisterPanel = () => {
             paddingTop: ['28px', '32px'],
           })}
         >
-          <AuthPanelButton
-            type="primary"
-            label="Take me in!"
-            onClick={onSignUp}
-          />
+          <AuthPanelButton type="primary" label="Take me in!" onClick={onSignUp} />
         </div>
       </form>
     </div>

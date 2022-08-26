@@ -10,6 +10,7 @@ export interface MessengrTheme {
     grey: string;
     divider: string;
     welcome: string;
+    toggle: string;
   };
   input: {
     search: Interpolation<Theme>;

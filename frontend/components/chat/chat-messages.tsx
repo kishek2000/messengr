@@ -15,10 +15,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ chat }) => {
       css={mq({
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-end',
         width: '100%',
-        height: '100%',
-        gap: '32px',
+        // height: '100%',
+        gap: '28px',
       })}
     >
       {chat.messages.map((message, index) => (

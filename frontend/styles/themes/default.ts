@@ -9,6 +9,7 @@ export const defaultTheme: MessengrTheme = {
     grey: 'rgba(0, 0, 0, 0.5)',
     divider: '1px solid rgba(255, 255, 255, 0.5)',
     welcome: 'black',
+    toggle: '#aaa',
   },
   input: {
     search: {

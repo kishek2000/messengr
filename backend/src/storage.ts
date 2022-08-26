@@ -1,7 +1,14 @@
-import { User } from "./model/types";
+import { ChatService } from './services/chat-service';
+import { decorateResponse } from './decorateResponse';
+import { Chat, Message, User } from './model/types';
+import { UserService } from './services/user-service';
 
 export class StorageDO {
 	state: DurableObjectState;
+	sessions: Map<string, [WebSocket, WebSocket]> = new Map<string, [WebSocket, WebSocket]>();
+
+	userService: UserService = new UserService();
+	chatService: ChatService = new ChatService();
 
 	constructor(state: DurableObjectState) {
 		this.state = state;
@@ -9,113 +16,137 @@ export class StorageDO {
 
 	async fetch(request: Request) {
 		const url = new URL(request.url);
-
 		switch (url.pathname) {
-			case "/register":
-				return new UserService().createUser(request, this.state);
-			case "/login":
-				return new UserService().loginUser(request, this.state);
-			case "/":
-				return decorateResponse("🚀🚀 Messengr API: Alive and well!!", 200);
+			case '/websocket':
+				return this.handleWebSocket(request);
+			case '/register':
+				return this.userService.createUser(request, this.state);
+			case '/login':
+				return this.userService.loginUser(request, this.state);
+			case '/users':
+				return this.userService.getUsers(request, this.state);
+			case '/chat':
+				return this.chatService.handleRequest(request, this.state);
+			case '/clean':
+				await this.state.storage.deleteAll();
+				return decorateResponse('Cleaned', 200);
+			case '/':
+				return decorateResponse('🚀🚀 Messengr API: Alive and well!!', 200);
 			default:
-				return decorateResponse("Endpoint not found...", 404);
-		}
-	}
-}
-
-export class UserService {
-	public async createUser(
-		request: Request,
-		state: DurableObjectState
-	): Promise<Response> {
-		try {
-			const userObj = (await request.json()) as User;
-			let users: User[] = [];
-			const storedUsers = (await state.storage.get("users")) as User[];
-			if (storedUsers) {
-				users = storedUsers;
-			}
-
-			if (users.filter((user) => user.id == userObj.id).length == 0) {
-				users.push(userObj);
-				state.storage.put("users", users);
-				return decorateResponse("Successfully, registered user,", 200);
-			} else {
-				return decorateResponse(
-					"User with given username already exists.",
-					400
-				);
-			}
-		} catch (e) {
-			return decorateResponse(`An error occurred :( - ${e}`, 404);
+				return decorateResponse('Endpoint not found...', 404);
 		}
 	}
 
-	public async loginUser(
-		request: Request,
-		state: DurableObjectState
-	): Promise<Response> {
-		try {
-			const userObj = (await request.json()) as Pick<
-				User,
-				"username" | "password"
-			>;
-			const users: User[] = (await state.storage.get("users")) as User[];
-			if (!users) {
-				return decorateResponse("No users currently exist", 400);
-			}
+	private async handleWebSocket(request: Request) {
+		const upgradeHeader = request.headers.get('Upgrade');
+		if (!upgradeHeader || upgradeHeader !== 'websocket') {
+			return decorateResponse('Expected Upgrade: websocket', 426);
+		}
 
-			const storedVersion = users.filter(
-				(user) => user.username == userObj.username
-			);
-			if (storedVersion.length == 0) {
-				return decorateResponse("Invalid username", 400);
-			} else {
-				if (storedVersion[0].password !== userObj.password) {
-					return decorateResponse("Incorrect password", 400);
-				}
-				return decorateResponse(
+		const id = new URL(request.url).searchParams.get('id');
+		if (!id) {
+			return decorateResponse('Fail: Expected some session id', 426);
+		}
+
+		if (this.sessions.get(id)) {
+			return decorateResponse('Websocket already exists', 426);
+		} else {
+			const webSocketPair = new WebSocketPair();
+			const [client, server] = Object.values(webSocketPair);
+
+			this.sessions.set(id, [client, server]);
+
+			server.accept();
+			server.addEventListener('message', (e) => this.socketListener(e, server));
+
+			return new Response(null, {
+				status: 101,
+				webSocket: client,
+			});
+		}
+	}
+
+	private async socketListener(event: MessageEvent, server: WebSocket) {
+		console.log('Received a message from client');
+
+		const message = JSON.parse(event.data as string) as SocketMessage;
+
+		if (message.type === 'updateChats') {
+			this.sendData(server, message);
+		} else if (message.type === 'addMessage') {
+			const data = message.data as { message: Message; chat: Chat };
+			const existingChats = ((await this.state.storage.get('chats')) || []) as Chat[];
+
+			if (existingChats.length === 0) {
+				server.send(
 					JSON.stringify({
-						statusText: "Login Successful!",
-						user: storedVersion[0],
-					}),
-					200
+						type: 'error',
+						data: 'No chats exist yet',
+					})
 				);
 			}
-		} catch (e) {
-			return decorateResponse(`An error occurred :( - ${e}`, 404);
+			const chat = existingChats.filter((storedChat) => storedChat.id === data.chat.id)[0];
+			chat.messages.push(data.message);
+			console.log('Updated chat structure ', chat);
+
+			const newChats = existingChats.filter((storedChat) => storedChat.id !== data.chat.id);
+			const chatsToStore = [...newChats, chat];
+			await this.state.storage.put('chats', chatsToStore);
+			console.log('New chats array ', chatsToStore);
+
+			const chatsWithUser = chatsToStore.filter((storedChat) => {
+				return (
+					storedChat.members.filter((member) => {
+						return member.id === data.message.sentBy.id;
+					}).length > 0
+				);
+			});
+			this.broadcastUpdate(chatsWithUser);
 		}
 	}
 
-	public async logoutUser(
-		_: Request,
-		state: DurableObjectState
-	): Promise<Response> {
-		try {
-			const users: User[] = (await state.storage.get("users")) as User[];
-			if (!users) {
-				return decorateResponse("No users currently exist", 400);
+	private broadcastUpdate(chatsWithUser: Chat[]) {
+		const serverSockets = Array.from(this.sessions.values());
+		for (let i = 0; i < serverSockets.length; i++) {
+			if (serverSockets[i][1]) {
+				try {
+					serverSockets[i][1].send(
+						JSON.stringify({
+							type: 'updateChats',
+							data: {
+								chats: chatsWithUser,
+							},
+						})
+					);
+				} catch (e) {
+					// do nothing
+				}
 			}
-			// TODO: End their socket connection(s) here
-			return decorateResponse("Successfully logged out user!", 200);
-		} catch (e) {
-			return decorateResponse(`An error occurred :( - ${e}`, 404);
 		}
+	}
+
+	private async sendData(server: WebSocket, message: SocketMessage) {
+		const data = message.data.user as User;
+		let chats: Chat[] = [];
+		const storedChats = (await this.state.storage.get('chats')) as Chat[];
+		if (storedChats) {
+			chats = storedChats;
+		}
+
+		const chatsWithUser = chats.filter((chat) => {
+			return (
+				chat.members.filter((member) => {
+					return member.id === data.id;
+				}).length > 0
+			);
+		});
+
+		this.broadcastUpdate(chatsWithUser);
 	}
 }
 
-export const decorateResponse = async (
-	body: string,
-	status: number
-): Promise<Response> => {
-	const headers = {
-		"Access-Control-Allow-Origin": "*",
-		"Access-Control-Allow-Methods":
-			"GET, HEAD, POST, PUT, OPTIONS, DELETE, UPDATE",
-		"Access-Control-Allow-Headers": "*",
-		"Access-Control-Max-Age": "86400",
-		"Content-type": "application/json",
-	};
-
-	return new Response(body, { headers, status });
-};
+interface SocketMessage {
+	type: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	data: any;
+}

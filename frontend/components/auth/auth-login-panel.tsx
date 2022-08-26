@@ -1,20 +1,19 @@
 /** @jsxImportSource @emotion/react */
 
-import { mq } from '../../styles/mq';
 import React from 'react';
+import { mq } from '../../styles/mq';
 import { ThemeContext } from '../../context/theme-context';
 import { AuthPanelInput } from './auth-panel-input';
 import { AuthPanelButton } from './auth-panel-button';
 import { useRouter } from 'next/router';
-import { mockUserA } from './__mocks__/mock-user-a';
-import { mockUserB } from './__mocks__/mock-user-b';
 import { UserContext } from '../../context/user-context';
-import { User } from '../../model/types';
-import { mockChatA } from '../chat/__mocks__/mock-chat-a';
+import { ChatContext } from '../../context/chats-context';
+import { loginUser } from '../../api/user';
 
 export const AuthLoginPanel = () => {
   const theme = React.useContext(ThemeContext);
   const { userDispatch } = React.useContext(UserContext);
+  const { state } = React.useContext(ChatContext);
   const router = useRouter();
 
   const [loginForm, setLoginForm] = React.useState({
@@ -22,37 +21,34 @@ export const AuthLoginPanel = () => {
     password: '',
   });
 
-  const handleFormChange = React.useCallback(
-    (name: string, e: React.ChangeEvent<HTMLInputElement>) => {
-      setLoginForm((form) => ({ ...form, [name]: e.target.value }));
-    },
-    []
-  );
+  const handleFormChange = React.useCallback((name: string, value: any) => {
+    setLoginForm((form) => ({ ...form, [name]: value }));
+  }, []);
 
   const onSignUp = () => {
     router.push('/signup');
   };
 
-  const onLogin = () => {
-    fetch('https://messengr-backend.kishek12.workers.dev/login', {
-      method: 'POST',
-      body: JSON.stringify(loginForm),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => {
-      response
-        .json()
-        .then((json) => {
-          userDispatch({ type: 'login', payload: { user: json.user } });
-          localStorage.setItem('user', JSON.stringify(json.user));
-          router.push('/chats');
+  const onLogin = React.useCallback(async () => {
+    try {
+      const user = await loginUser(loginForm);
+      userDispatch({ type: 'login', payload: { user } });
+      localStorage.setItem('user', JSON.stringify(user));
+
+      state.socket.send(
+        JSON.stringify({
+          type: 'updateChats',
+          data: {
+            user: user,
+          },
         })
-        .catch((err) => {
-          console.log('Error', err);
-        });
-    });
-  };
+      );
+
+      router.push('/chats');
+    } catch (e) {
+      console.error(e);
+    }
+  }, [loginForm, router, state.socket, userDispatch]);
 
   return (
     <div
@@ -68,10 +64,8 @@ export const AuthLoginPanel = () => {
         gap: '56px',
       })}
     >
-      <h5 css={mq({ fontWeight: 500, margin: 0, color: theme.colors.primary })}>
-        Login
-      </h5>
-      <form
+      <h5 css={mq({ fontWeight: 500, margin: 0, color: theme.colors.primary })}>Login</h5>
+      <div
         css={mq({
           width: '100%',
           display: 'flex',
@@ -102,14 +96,10 @@ export const AuthLoginPanel = () => {
             paddingTop: ['28px', '32px'],
           })}
         >
-          <AuthPanelButton
-            type="secondary"
-            label="Sign Up"
-            onClick={onSignUp}
-          />
+          <AuthPanelButton type="secondary" label="Sign Up" onClick={onSignUp} />
           <AuthPanelButton type="primary" label="Log In" onClick={onLogin} />
         </div>
-      </form>
+      </div>
     </div>
   );
 };

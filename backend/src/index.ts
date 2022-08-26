@@ -1,4 +1,4 @@
-import { decorateResponse } from "./storage";
+import { decorateResponse } from './decorateResponse';
 
 export interface Env {
 	STORAGE: DurableObjectNamespace;
@@ -6,8 +6,8 @@ export interface Env {
 
 export default {
 	async fetch(request: Request, env: Env) {
-		if (request.method === "OPTIONS") {
-			return decorateResponse("", 200);
+		if (request.method === 'OPTIONS') {
+			return decorateResponse('', 200);
 		}
 		try {
 			return await handleRequest(request, env);
@@ -18,10 +18,10 @@ export default {
 };
 
 const handleRequest = async (request: Request, env: Env) => {
-	const doId = env.STORAGE.idFromName("messengr");
+	const doId = env.STORAGE.idFromName('messengr');
 	const obj = env.STORAGE.get(doId);
 
 	return await obj.fetch(request);
 };
 
-export { StorageDO } from "./storage";
+export { StorageDO } from './storage';

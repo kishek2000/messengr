@@ -6,25 +6,12 @@ import { MessengrMenu } from '../components/menu/messengr-menu';
 import { ChatCompleteView } from '../components/chat/chat-complete-view';
 import React from 'react';
 import { Chat } from '../model/types';
-import { UserContext } from '../context/user-context';
-import { getUserChatsById } from '../api/chat';
+import { ChatContext } from '../context/chats-context';
 
 const Chats: NextPage = () => {
-  const [chats, setChats] = React.useState<Chat[]>([]);
-  const [activeChat, setActiveChat] = React.useState<Chat | null>(null);
-  const { user } = React.useContext(UserContext);
-
-  // Draft for now, needs to be cleaned up for future
-  React.useEffect(() => {
-    getUserChatsById(user.id)
-      .then((chats) => {
-        setChats(chats);
-        setActiveChat(chats[0]);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, [user]);
+  // Id of the active chat
+  const [activeChat, setActiveChat] = React.useState<string>('');
+  const { state } = React.useContext(ChatContext);
 
   return (
     <main
@@ -47,11 +34,11 @@ const Chats: NextPage = () => {
         })}
       >
         <MessengrMenu
-          chats={chats}
+          chats={state.chats || []}
           activeChat={activeChat}
           setActiveChat={setActiveChat}
         />
-        <ChatCompleteView chat={activeChat} />
+        <ChatCompleteView activeChat={activeChat} chats={state.chats || []} />
       </div>
     </main>
   );

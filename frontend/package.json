@@ -12,6 +12,8 @@
   "dependencies": {
     "@emotion/css": "^11.10.0",
     "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@mui/material": "^5.10.2",
     "facepaint": "^1.2.1",
     "next": "12.2.5",
     "normalize.css": "^8.0.1",

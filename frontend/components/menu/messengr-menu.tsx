@@ -7,20 +7,23 @@ import { headingFont } from '../../styles/fonts';
 import { mq } from '../../styles/mq';
 import { AuthLogoutButton } from '../auth/auth-logout-button';
 import { MenuChatList } from './menu-chat-list';
+import { BiCommentAdd } from 'react-icons/bi';
+import { ChatCreationDialog } from './chat-creation-dialog';
 
 export interface MessengrMenuProps {
   chats: Chat[];
-  activeChat: Chat | null;
-  setActiveChat: React.Dispatch<React.SetStateAction<Chat | null>>;
+  activeChat: string;
+  setActiveChat: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const MessengrMenu: React.FC<MessengrMenuProps> = ({
-  chats,
-  activeChat,
-  setActiveChat,
-}) => {
+export const MessengrMenu: React.FC<MessengrMenuProps> = ({ chats, activeChat, setActiveChat }) => {
   const theme = React.useContext(ThemeContext);
   const style = theme['components']['menu'] as { [key: string]: string };
+
+  const [openChatCreation, setOpenChatCreation] = React.useState(false);
+  const toggleChatCreationDialog = React.useCallback((open: boolean) => {
+    setOpenChatCreation(open);
+  }, []);
 
   return (
     <aside
@@ -35,6 +38,10 @@ export const MessengrMenu: React.FC<MessengrMenuProps> = ({
         zIndex: '2',
       })}
     >
+      <ChatCreationDialog
+        openChatCreation={openChatCreation}
+        toggleChatCreationDialog={toggleChatCreationDialog}
+      />
       <div
         css={{
           display: 'flex',
@@ -52,25 +59,54 @@ export const MessengrMenu: React.FC<MessengrMenuProps> = ({
             height: '90%',
           }}
         >
-          <h3
+          <hgroup
             css={mq({
-              fontFamily: headingFont,
-              fontSize: ['20px', '24px'],
-              fontWeight: 700,
-              color: theme.colors.primary,
-              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              width: '100%',
+              justifyContent: 'space-between',
               borderBottom: theme.colors.divider,
               paddingBottom: '12px',
-              margin: 0,
             })}
           >
-            Chats
-          </h3>
-          <MenuChatList
-            chats={chats}
-            activeChat={activeChat}
-            setActiveChat={setActiveChat}
-          />
+            <h3
+              css={mq({
+                fontFamily: headingFont,
+                fontSize: ['20px', '24px'],
+                fontWeight: 700,
+                color: theme.colors.primary,
+                textAlign: 'left',
+
+                margin: 0,
+              })}
+            >
+              Chats
+            </h3>
+            <button
+              css={mq({
+                outline: 'none',
+                border: 'none',
+                background: theme.colors.toggle,
+                color: theme.colors.primary,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                ':hover': {
+                  opacity: 0.9,
+                },
+                transition: '0.2s',
+              })}
+              onClick={() => toggleChatCreationDialog(true)}
+            >
+              <BiCommentAdd />
+            </button>
+          </hgroup>
+          <MenuChatList chats={chats} activeChat={activeChat} setActiveChat={setActiveChat} />
         </div>
         <AuthLogoutButton />
       </div>

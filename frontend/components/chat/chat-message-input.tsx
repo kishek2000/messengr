@@ -2,11 +2,40 @@
 
 import React from 'react';
 import { AiFillPlusCircle } from 'react-icons/ai';
+import { ChatContext } from '../../context/chats-context';
 import { ThemeContext } from '../../context/theme-context';
+import { UserContext } from '../../context/user-context';
+import { Chat, Message } from '../../model/types';
 import { mq } from '../../styles/mq';
 
-export const ChatMessageInput = () => {
+export const ChatMessageInput: React.FC<{ chat: Chat }> = ({ chat }) => {
   const theme = React.useContext(ThemeContext);
+  const { state } = React.useContext(ChatContext);
+  const [message, setMessage] = React.useState('');
+  const { user } = React.useContext(UserContext);
+
+  const onSubmit = React.useCallback(() => {
+    const messageObj: Message = {
+      messageContent: {
+        content: message,
+        dataType: 'text',
+      },
+      seenBy: [],
+      sentAt: new Date().toLocaleString(),
+      sentBy: user,
+    };
+
+    state.socket.send(
+      JSON.stringify({
+        type: 'addMessage',
+        data: {
+          message: messageObj,
+          chat,
+        },
+      })
+    );
+    setMessage('');
+  }, [state, user, chat, message]);
 
   return (
     <div
@@ -25,7 +54,16 @@ export const ChatMessageInput = () => {
           borderRadius: '24px',
           padding: '12px 16px',
         })}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onSubmit();
+          }
+        }}
         placeholder="Type a message..."
+        value={message}
+        onChange={(e) => {
+          setMessage(e.target.value);
+        }}
       />
       <div
         css={mq({

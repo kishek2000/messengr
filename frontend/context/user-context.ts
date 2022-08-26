@@ -20,7 +20,7 @@ export const initialUser = {
 
 export const userDispatcher = (
   state: User,
-  action: { type: String; payload: any }
+  action: { type: string; payload: any }
 ) => {
   switch (action.type) {
     case 'login':

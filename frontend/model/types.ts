@@ -2,8 +2,9 @@ export interface Chat {
   chatName: string;
   chatAvatar: string;
   messages: Message[];
-  members: User[];
+  members: Omit<User, 'password'>[];
   owner: User;
+  id: string;
 }
 
 export interface User {
@@ -15,9 +16,9 @@ export interface User {
 
 export interface Message {
   messageContent: MessageContent;
-  seenBy: Pick<User, 'username' | 'avatar'>;
-  sentBy: Pick<User, 'username' | 'avatar'>;
-  sentAt: Date;
+  seenBy: Pick<User, 'username' | 'avatar' | 'id'>[];
+  sentBy: Pick<User, 'username' | 'avatar' | 'id'>;
+  sentAt: string;
 }
 
 type ContentType = 'text' | 'image' | 'video';

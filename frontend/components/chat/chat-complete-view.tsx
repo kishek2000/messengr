@@ -10,11 +10,21 @@ import { ChatMessageInput } from './chat-message-input';
 import { ChatHeader } from './chat-header';
 
 interface ChatCompleteViewProps {
-  chat: Chat | null;
+  activeChat: string;
+  chats: Chat[];
 }
 
-export const ChatCompleteView: React.FC<ChatCompleteViewProps> = ({ chat }) => {
+export const ChatCompleteView: React.FC<ChatCompleteViewProps> = ({ activeChat, chats }) => {
+  const [chat, setChat] = React.useState<Chat | null>(
+    activeChat !== '' ? chats.filter((storedChat) => storedChat.id === activeChat)[0] : null
+  );
   const theme = React.useContext(ThemeContext);
+
+  React.useEffect(() => {
+    setChat(
+      activeChat !== '' ? chats.filter((storedChat) => storedChat.id === activeChat)[0] : null
+    );
+  }, [chats, activeChat]);
 
   return (
     <section
@@ -24,12 +34,22 @@ export const ChatCompleteView: React.FC<ChatCompleteViewProps> = ({ chat }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        fontFamily: paragraphFont,
         alignItems: 'center',
+        color: theme.colors.primary,
         justifyContent: 'center',
       })}
     >
       {!chat ? (
-        <span>Loading...</span>
+        <span
+          css={mq({
+            color: theme.colors.grey,
+            opacity: 0.6,
+            fontSize: ['20px', '24px'],
+          })}
+        >
+          Add a new chat to get started!
+        </span>
       ) : (
         <div
           css={mq({
@@ -37,9 +57,7 @@ export const ChatCompleteView: React.FC<ChatCompleteViewProps> = ({ chat }) => {
             height: '90%',
             display: 'flex',
             flexDirection: 'column',
-            color: theme.colors.primary,
             gap: '48px',
-            fontFamily: paragraphFont,
           })}
         >
           <section
@@ -48,12 +66,26 @@ export const ChatCompleteView: React.FC<ChatCompleteViewProps> = ({ chat }) => {
               flexDirection: 'column',
               gap: '24px',
               height: '100%',
+              overflowY: 'auto',
+              width: '100%',
+              paddingRight: '24px',
+              marginRight: '-24px',
             })}
           >
             <ChatHeader chat={chat} />
-            <ChatMessages chat={chat} />
+            <div
+              css={mq({
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column-reverse',
+                paddingRight: '24px',
+                marginRight: '-24px',
+              })}
+            >
+              <ChatMessages chat={chat} />
+            </div>
           </section>
-          <ChatMessageInput />
+          <ChatMessageInput chat={chat} />
         </div>
       )}
     </section>

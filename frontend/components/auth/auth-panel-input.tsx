@@ -9,7 +9,7 @@ interface AuthPanelInputProps {
   placeholder: string;
   type?: string;
   value: string;
-  onChange: (name: string, e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (name: string, e: any) => void;
 }
 
 export const AuthPanelInput: React.FC<AuthPanelInputProps> = ({
@@ -33,7 +33,7 @@ export const AuthPanelInput: React.FC<AuthPanelInputProps> = ({
       placeholder={placeholder}
       autoComplete="false"
       type={type}
-      onChange={(e) => onChange(name, e)}
+      onChange={(e) => onChange(name, e.target.value)}
       value={value}
     />
   );

@@ -5,9 +5,10 @@ export const darkTheme: MessengrTheme = {
     primary: 'white',
     secondary: '#060917',
     tertiary: '#030610',
-    grey: 'rgba(255, 255, 255, 0.5)',
+    grey: 'lightskyblue',
     divider: '1px solid rgba(255, 255, 255, 0.5)',
     welcome: 'magenta',
+    toggle: '#333',
   },
   input: {
     search: {

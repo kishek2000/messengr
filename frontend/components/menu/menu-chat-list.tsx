@@ -7,11 +7,7 @@ import { mq } from '../../styles/mq';
 import { ChatSummarisedView } from '../chat/chat-summarised-view';
 import { MessengrMenuProps } from './messengr-menu';
 
-export const MenuChatList: React.FC<MessengrMenuProps> = ({
-  chats,
-  activeChat,
-  setActiveChat,
-}) => {
+export const MenuChatList: React.FC<MessengrMenuProps> = ({ chats, activeChat, setActiveChat }) => {
   const theme = React.useContext(ThemeContext);
 
   return (
@@ -52,8 +48,8 @@ export const MenuChatList: React.FC<MessengrMenuProps> = ({
             <ChatSummarisedView
               key={index}
               chat={chat}
-              isActive={chat === activeChat}
-              toggleActive={() => setActiveChat(chat)}
+              isActive={chat.id === activeChat}
+              toggleActive={() => setActiveChat(chat.id)}
             />
           ))
         ) : (
